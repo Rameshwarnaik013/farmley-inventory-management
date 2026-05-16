@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/process.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/api/process", "dest": "/api/process.py" },
+    { "src": "/api/download", "dest": "/api/process.py" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
+}
