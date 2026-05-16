@@ -7,44 +7,43 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #1F4E79; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .tab-active { border-bottom: 3px solid #1F4E79; color: #1F4E79; font-weight: 600; }
-        .tab-inactive { border-bottom: 3px solid transparent; color: #6b7280; }
-        .tab-inactive:hover { color: #1F4E79; }
-        table { font-size: 0.8rem; }
-        th { position: sticky; top: 0; z-index: 10; }
-        .metric-card { transition: transform 0.15s; }
-        .metric-card:hover { transform: translateY(-2px); }
-        .risk-high { background: #FEE2E2; color: #991B1B; }
-        .risk-medium { background: #FEF3C7; color: #92400E; }
-        .risk-low { background: #D1FAE5; color: #065F46; }
-        .trend-growing { color: #059669; }
-        .trend-declining { color: #DC2626; }
-        .trend-stable { color: #6B7280; }
-        #tableContainer { max-height: 600px; overflow: auto; }
-        .filter-chip { transition: all 0.15s; }
-        .filter-chip.active { background: #1F4E79; color: white; }
-        .filter-chip:not(.active) { background: #F3F4F6; color: #374151; }
-        .filter-chip:hover:not(.active) { background: #E5E7EB; }
-        input[type="file"]::file-selector-button {
-            background: #1F4E79; color: white; border: none; padding: 6px 16px;
-            border-radius: 6px; cursor: pointer; font-size: 0.85rem;
-        }
-        input[type="file"]::file-selector-button:hover { background: #163B5E; }
-        .search-box { transition: border-color 0.2s; }
-        .search-box:focus { border-color: #1F4E79; outline: none; box-shadow: 0 0 0 3px rgba(31,78,121,0.1); }
+        *{font-family:'Inter',sans-serif}
+        .loader{border:3px solid #f3f3f3;border-top:3px solid #1F4E79;border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;display:inline-block}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .tab-active{border-bottom:3px solid #1F4E79;color:#1F4E79;font-weight:600}
+        .tab-inactive{border-bottom:3px solid transparent;color:#6b7280}
+        .tab-inactive:hover{color:#1F4E79}
+        table{font-size:.78rem}
+        th{position:sticky;top:0;z-index:10}
+        .metric-card{transition:transform .15s}
+        .metric-card:hover{transform:translateY(-2px)}
+        .risk-high{background:#FEE2E2;color:#991B1B}
+        .risk-medium{background:#FEF3C7;color:#92400E}
+        .risk-low{background:#D1FAE5;color:#065F46}
+        .status-excess{background:#FEE2E2;color:#991B1B}
+        .status-optimal{background:#D1FAE5;color:#065F46}
+        .status-below{background:#FEF3C7;color:#92400E}
+        .trend-growing{color:#059669}
+        .trend-declining{color:#DC2626}
+        .trend-stable{color:#6B7280}
+        #tableContainer{max-height:600px;overflow:auto}
+        .filter-chip{transition:all .15s}
+        .filter-chip.active{background:#1F4E79;color:white}
+        .filter-chip:not(.active){background:#F3F4F6;color:#374151}
+        .filter-chip:hover:not(.active){background:#E5E7EB}
+        input[type="file"]::file-selector-button{background:#1F4E79;color:white;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.85rem}
+        input[type="file"]::file-selector-button:hover{background:#163B5E}
+        .search-box:focus{border-color:#1F4E79;outline:none;box-shadow:0 0 0 3px rgba(31,78,121,.1)}
+        .formula-box{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:12px 16px;font-family:'Courier New',monospace;font-size:.85rem}
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-<!-- Header -->
 <header class="bg-white border-b shadow-sm sticky top-0 z-50">
     <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-[#1F4E79]">Farmley Inventory Management</h1>
-            <p class="text-sm text-gray-500">Min-Max Warehouse Inventory &middot; Safety Stock &middot; Deviation Analysis</p>
+            <p class="text-sm text-gray-500">Min-Max Warehouse Inventory &middot; Safety Stock &middot; DOH Analysis &middot; KGS Tracking</p>
         </div>
         <div id="downloadSection" class="hidden flex gap-3">
             <button onclick="downloadExcel()" class="bg-[#1F4E79] hover:bg-[#163B5E] text-white px-5 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 shadow">
@@ -68,101 +67,51 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Sales / Sigma Data <span class="text-red-500">*</span></label>
             <input type="file" id="sigmaFile" accept=".xlsx,.xls" class="w-full text-sm">
-            <p class="text-xs text-gray-400 mt-1">Monthly sales with Item_Name, Metric columns</p>
+            <p class="text-xs text-gray-400 mt-1">Monthly: Item_Name, Metric (Qty UNT + Stock KGS + Amount)</p>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">ABC Analysis <span class="text-red-500">*</span></label>
             <input type="file" id="abcFile" accept=".xlsx,.xls" class="w-full text-sm">
-            <p class="text-xs text-gray-400 mt-1">Sheet: abc_summary with Category column</p>
+            <p class="text-xs text-gray-400 mt-1">Sheet: abc_summary with Category, Origin, Mrp</p>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">IDR Projection <span class="text-gray-400">(optional)</span></label>
-            <input type="file" id="idrFile" accept=".xlsx,.xls" class="w-full text-sm">
-            <p class="text-xs text-gray-400 mt-1">Sheet: Projection with Projection Units</p>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sales Projection <span class="text-gray-400">(optional)</span></label>
+            <input type="file" id="projFile" accept=".xlsx,.xls" class="w-full text-sm">
+            <p class="text-xs text-gray-400 mt-1">With Conversion Factor, Projection Units, Total KGs</p>
         </div>
     </div>
-
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Lead Time (days)</label>
-            <input type="number" id="leadTime" value="2" min="1" max="30" class="w-full border rounded-lg px-3 py-2 text-sm search-box">
-        </div>
-        <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Order Cycle (months)</label>
-            <input type="number" id="orderCycle" value="1" min="0.5" max="3" step="0.5" class="w-full border rounded-lg px-3 py-2 text-sm search-box">
-        </div>
-        <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Z-Score A (95% SL)</label>
-            <input type="number" id="zA" value="1.65" min="1" max="3" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box">
-        </div>
-        <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Z-Score B (90% SL)</label>
-            <input type="number" id="zB" value="1.28" min="1" max="3" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box">
-        </div>
-        <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Z-Score C (85% SL)</label>
-            <input type="number" id="zC" value="1.04" min="0.5" max="2" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box">
-        </div>
+        <div><label class="block text-xs font-medium text-gray-600 mb-1">Lead Time (days)</label><input type="number" id="leadTime" value="2" min="1" max="30" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
+        <div><label class="block text-xs font-medium text-gray-600 mb-1">Order Cycle (months)</label><input type="number" id="orderCycle" value="1" min="0.5" max="3" step="0.5" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
+        <div><label class="block text-xs font-medium text-gray-600 mb-1">Z-Score A (95% SL)</label><input type="number" id="zA" value="1.65" min="1" max="3" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
+        <div><label class="block text-xs font-medium text-gray-600 mb-1">Z-Score B (90% SL)</label><input type="number" id="zB" value="1.28" min="1" max="3" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
+        <div><label class="block text-xs font-medium text-gray-600 mb-1">Z-Score C (85% SL)</label><input type="number" id="zC" value="1.04" min="0.5" max="2" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
     </div>
-
-    <button id="processBtn" onclick="processData()" class="bg-[#1F4E79] hover:bg-[#163B5E] text-white px-8 py-3 rounded-lg font-semibold text-sm shadow-md transition-colors">
-        Process Data
-    </button>
-    <span id="loadingIndicator" class="hidden ml-4 items-center gap-2 text-sm text-gray-500">
-        <span class="loader"></span> Processing...
-    </span>
+    <button id="processBtn" onclick="processData()" class="bg-[#1F4E79] hover:bg-[#163B5E] text-white px-8 py-3 rounded-lg font-semibold text-sm shadow-md">Process Data</button>
+    <span id="loadingIndicator" class="hidden ml-4 items-center gap-2 text-sm text-gray-500"><span class="loader"></span> Processing...</span>
     <span id="errorMsg" class="hidden ml-4 text-sm text-red-600"></span>
 </div>
 
 <!-- Metrics -->
 <div id="metricsPanel" class="hidden grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4">
-        <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Total SKUs</p>
-        <p id="metricSKUs" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p>
-    </div>
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4">
-        <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Safety Stock Value</p>
-        <p id="metricSS" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p>
-    </div>
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4">
-        <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">MIN Inventory</p>
-        <p id="metricMin" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p>
-    </div>
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4">
-        <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">MAX Inventory</p>
-        <p id="metricMax" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p>
-    </div>
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4">
-        <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Avg Inventory</p>
-        <p id="metricAvg" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p>
-    </div>
+    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Total SKUs</p><p id="metricSKUs" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Safety Stock Value</p><p id="metricSS" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">MIN Inventory</p><p id="metricMin" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">MAX Inventory</p><p id="metricMax" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Avg Inventory</p><p id="metricAvg" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
 </div>
 
 <!-- Filters -->
 <div id="filtersPanel" class="hidden bg-white rounded-xl shadow-sm border p-4 mb-6">
     <div class="flex flex-wrap items-center gap-4">
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-gray-500 uppercase">ABC:</span>
-            <div id="abcFilters" class="flex gap-1"></div>
-        </div>
+        <div class="flex items-center gap-2"><span class="text-xs font-semibold text-gray-500 uppercase">ABC:</span><div id="abcFilters" class="flex gap-1"></div></div>
         <div class="h-6 w-px bg-gray-200"></div>
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-gray-500 uppercase">Trend:</span>
-            <div id="trendFilters" class="flex gap-1"></div>
-        </div>
+        <div class="flex items-center gap-2"><span class="text-xs font-semibold text-gray-500 uppercase">Trend:</span><div id="trendFilters" class="flex gap-1"></div></div>
         <div class="h-6 w-px bg-gray-200"></div>
-        <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-            <span class="text-xs font-semibold text-gray-500 uppercase">Group:</span>
-            <select id="groupFilter" class="border rounded-lg px-2 py-1 text-sm flex-1 search-box" onchange="applyFilters()">
-                <option value="ALL">All Groups</option>
-            </select>
-        </div>
-        <div class="flex items-center gap-2 flex-1 min-w-[150px]">
-            <span class="text-xs font-semibold text-gray-500 uppercase">Origin:</span>
-            <select id="originFilter" class="border rounded-lg px-2 py-1 text-sm flex-1 search-box" onchange="applyFilters()">
-                <option value="ALL">All Origins</option>
-            </select>
-        </div>
+        <div class="flex items-center gap-2"><span class="text-xs font-semibold text-gray-500 uppercase">DOH:</span><div id="dohFilters" class="flex gap-1"></div></div>
+        <div class="h-6 w-px bg-gray-200"></div>
+        <div class="flex items-center gap-2 flex-1 min-w-[180px]"><span class="text-xs font-semibold text-gray-500 uppercase">Group:</span><select id="groupFilter" class="border rounded-lg px-2 py-1 text-sm flex-1 search-box" onchange="applyFilters()"><option value="ALL">All Groups</option></select></div>
+        <div class="flex items-center gap-2 flex-1 min-w-[140px]"><span class="text-xs font-semibold text-gray-500 uppercase">Origin:</span><select id="originFilter" class="border rounded-lg px-2 py-1 text-sm flex-1 search-box" onchange="applyFilters()"><option value="ALL">All Origins</option></select></div>
         <div class="flex items-center gap-2 flex-1 min-w-[200px]">
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input type="text" id="searchBox" placeholder="Search item name..." class="border rounded-lg px-3 py-1.5 text-sm flex-1 search-box" oninput="applyFilters()">
@@ -170,92 +119,140 @@
     </div>
 </div>
 
-<!-- Tabs + Content -->
+<!-- Tabs -->
 <div id="contentPanel" class="hidden">
-    <div class="flex border-b mb-4 gap-1">
-        <button class="tab-btn tab-active px-5 py-3 text-sm cursor-pointer transition-colors" data-tab="inventory" onclick="switchTab('inventory')">Min-Max Inventory</button>
-        <button class="tab-btn tab-inactive px-5 py-3 text-sm cursor-pointer transition-colors" data-tab="deviations" onclick="switchTab('deviations')">Deviations</button>
-        <button class="tab-btn tab-inactive px-5 py-3 text-sm cursor-pointer transition-colors" data-tab="forecast" onclick="switchTab('forecast')">Forecast vs Actual</button>
-        <button class="tab-btn tab-inactive px-5 py-3 text-sm cursor-pointer transition-colors" data-tab="summary" onclick="switchTab('summary')">Summary</button>
+    <div class="flex border-b mb-4 gap-1 overflow-x-auto">
+        <button class="tab-btn tab-active px-4 py-3 text-sm cursor-pointer whitespace-nowrap" data-tab="inventory" onclick="switchTab('inventory')">Min-Max (Units)</button>
+        <button class="tab-btn tab-inactive px-4 py-3 text-sm cursor-pointer whitespace-nowrap" data-tab="kgs" onclick="switchTab('kgs')">Min-Max (KGS)</button>
+        <button class="tab-btn tab-inactive px-4 py-3 text-sm cursor-pointer whitespace-nowrap" data-tab="doh" onclick="switchTab('doh')">DOH Analysis</button>
+        <button class="tab-btn tab-inactive px-4 py-3 text-sm cursor-pointer whitespace-nowrap" data-tab="deviations" onclick="switchTab('deviations')">Deviations</button>
+        <button class="tab-btn tab-inactive px-4 py-3 text-sm cursor-pointer whitespace-nowrap" data-tab="forecast" onclick="switchTab('forecast')">Forecast vs Actual</button>
+        <button class="tab-btn tab-inactive px-4 py-3 text-sm cursor-pointer whitespace-nowrap" data-tab="summary" onclick="switchTab('summary')">Summary</button>
+        <button class="tab-btn tab-inactive px-4 py-3 text-sm cursor-pointer whitespace-nowrap" data-tab="methodology" onclick="switchTab('methodology')">Methodology</button>
     </div>
 
-    <div id="tab-inventory" class="tab-content">
-        <div class="bg-white rounded-xl shadow-sm border">
-            <div id="tableContainer" class="overflow-auto" style="max-height: 600px;">
-                <table class="w-full text-left">
-                    <thead id="invHead" class="bg-[#1F4E79] text-white"></thead>
-                    <tbody id="invBody" class="divide-y"></tbody>
-                </table>
-            </div>
-            <div class="px-4 py-2 border-t bg-gray-50 text-xs text-gray-500">
-                <span id="rowCount">0</span> items shown
-            </div>
-        </div>
-    </div>
+    <!-- Tab: Inventory Units -->
+    <div id="tab-inventory" class="tab-content"><div class="bg-white rounded-xl shadow-sm border"><div class="overflow-auto" style="max-height:600px"><table class="w-full text-left"><thead id="invHead" class="bg-[#1F4E79] text-white"></thead><tbody id="invBody" class="divide-y"></tbody></table></div><div class="px-4 py-2 border-t bg-gray-50 text-xs text-gray-500"><span id="rowCount">0</span> items shown</div></div></div>
 
+    <!-- Tab: KGS -->
+    <div id="tab-kgs" class="tab-content hidden"><div class="bg-white rounded-xl shadow-sm border"><div class="overflow-auto" style="max-height:600px"><table class="w-full text-left"><thead id="kgsHead" class="bg-[#1F4E79] text-white"></thead><tbody id="kgsBody" class="divide-y"></tbody></table></div></div></div>
+
+    <!-- Tab: DOH Analysis -->
+    <div id="tab-doh" class="tab-content hidden"><div class="bg-white rounded-xl shadow-sm border"><div class="overflow-auto" style="max-height:600px"><table class="w-full text-left"><thead id="dohHead" class="bg-[#1F4E79] text-white"></thead><tbody id="dohBody" class="divide-y"></tbody></table></div></div></div>
+
+    <!-- Tab: Deviations -->
     <div id="tab-deviations" class="tab-content hidden">
         <div class="flex gap-3 mb-4">
             <button class="dev-type-btn filter-chip active px-4 py-2 rounded-lg text-sm cursor-pointer" onclick="switchDevType('abs')">Absolute (Units)</button>
             <button class="dev-type-btn filter-chip px-4 py-2 rounded-lg text-sm cursor-pointer" onclick="switchDevType('pct')">Percentage (%)</button>
+            <button class="dev-type-btn filter-chip px-4 py-2 rounded-lg text-sm cursor-pointer" onclick="switchDevType('stock')">Stock KGS Change</button>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border overflow-auto" style="max-height: 600px;">
-            <table class="w-full text-left">
-                <thead id="devHead" class="bg-[#1F4E79] text-white"></thead>
-                <tbody id="devBody" class="divide-y"></tbody>
-            </table>
-        </div>
+        <div class="bg-white rounded-xl shadow-sm border overflow-auto" style="max-height:600px"><table class="w-full text-left"><thead id="devHead" class="bg-[#1F4E79] text-white"></thead><tbody id="devBody" class="divide-y"></tbody></table></div>
     </div>
 
+    <!-- Tab: Forecast -->
     <div id="tab-forecast" class="tab-content hidden">
-        <div class="flex gap-3 mb-4">
-            <span class="text-xs font-semibold text-gray-500 uppercase mt-2">Risk:</span>
-            <div id="riskFilters" class="flex gap-1"></div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border overflow-auto" style="max-height: 600px;">
-            <table class="w-full text-left">
-                <thead class="bg-[#1F4E79] text-white">
-                    <tr>
-                        <th class="px-3 py-2">Item</th><th class="px-3 py-2">ABC</th><th class="px-3 py-2">Group</th>
-                        <th class="px-3 py-2 text-right">Recent Avg</th><th class="px-3 py-2 text-right">Projection</th>
-                        <th class="px-3 py-2 text-right">Deviation</th><th class="px-3 py-2 text-right">Dev %</th>
-                        <th class="px-3 py-2 text-center">Risk</th>
-                    </tr>
-                </thead>
-                <tbody id="fcBody" class="divide-y"></tbody>
-            </table>
-        </div>
+        <div class="flex gap-3 mb-4"><span class="text-xs font-semibold text-gray-500 uppercase mt-2">Risk:</span><div id="riskFilters" class="flex gap-1"></div></div>
+        <div class="bg-white rounded-xl shadow-sm border overflow-auto" style="max-height:600px"><table class="w-full text-left"><thead class="bg-[#1F4E79] text-white"><tr><th class="px-3 py-2">Item</th><th class="px-3 py-2">ABC</th><th class="px-3 py-2">Group</th><th class="px-3 py-2 text-right">Recent Avg</th><th class="px-3 py-2 text-right">Projection</th><th class="px-3 py-2 text-right">Proj KGS</th><th class="px-3 py-2 text-right">Dev %</th><th class="px-3 py-2 text-center">Risk</th></tr></thead><tbody id="fcBody" class="divide-y"></tbody></table></div>
     </div>
 
+    <!-- Tab: Summary -->
     <div id="tab-summary" class="tab-content hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-xl shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">ABC Category Summary</h3>
-                <table class="w-full text-sm">
-                    <thead><tr class="border-b">
-                        <th class="py-2 text-left">Cat</th><th class="py-2 text-right">Items</th><th class="py-2 text-right">SL</th>
-                        <th class="py-2 text-right">SS (Cr)</th><th class="py-2 text-right">MIN (Cr)</th>
-                        <th class="py-2 text-right">MAX (Cr)</th><th class="py-2 text-right">DoS</th>
-                        <th class="py-2 text-center">Trend</th>
-                    </tr></thead>
-                    <tbody id="summaryBody"></tbody>
-                </table>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Model Parameters</h3>
-                <table class="w-full text-sm" id="paramsTable">
-                    <thead><tr class="border-b"><th class="py-2 text-left">Parameter</th><th class="py-2 text-left">Value</th><th class="py-2 text-left">Note</th></tr></thead>
-                    <tbody id="paramsBody"></tbody>
-                </table>
-                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <h4 class="font-semibold text-sm text-blue-800 mb-2">Formula Reference</h4>
-                    <div class="text-xs text-blue-700 space-y-1">
-                        <p><b>Safety Stock</b> = Z x (sigma_monthly / sqrt(30)) x sqrt(LT_days)</p>
-                        <p><b>MIN (ROP)</b> = (Daily Demand x LT) + Safety Stock</p>
-                        <p><b>MAX</b> = MIN + Order Qty</p>
-                        <p><b>Avg Inventory</b> = (MAX + MIN) / 2</p>
-                        <p><b>DoS</b> = Inventory / Daily Demand</p>
+            <div class="bg-white rounded-xl shadow-sm border p-6"><h3 class="text-lg font-semibold text-gray-800 mb-4">ABC Category Summary</h3><table class="w-full text-sm"><thead><tr class="border-b"><th class="py-2 text-left">Cat</th><th class="py-2 text-right">Items</th><th class="py-2 text-right">SL</th><th class="py-2 text-right">SS (Cr)</th><th class="py-2 text-right">DOH Range</th><th class="py-2 text-center">DOH Status</th><th class="py-2 text-center">Trend</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border p-6"><h3 class="text-lg font-semibold text-gray-800 mb-4">Model Parameters</h3><table class="w-full text-sm"><thead><tr class="border-b"><th class="py-2 text-left">Parameter</th><th class="py-2 text-left">Value</th><th class="py-2 text-left">Note</th></tr></thead><tbody id="paramsBody"></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- Tab: Methodology -->
+    <div id="tab-methodology" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm border p-8 max-w-4xl">
+            <h2 class="text-2xl font-bold text-[#1F4E79] mb-2">DOH Determination Methodology</h2>
+            <p class="text-sm text-gray-500 mb-6">Analytically Driven Calculation Framework for Finished Goods Inventory Holding Duration</p>
+
+            <div class="space-y-8" id="methodologyContent">
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-[#1F4E79] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">1</span> ABC Classification (Pareto Analysis)</h3>
+                    <p class="text-sm text-gray-600 mb-2">SKUs are ranked by <b>Annual Usage Value = Units Sold x MRP</b> and classified into three tiers:</p>
+                    <table class="text-sm border w-full mb-2"><tr class="bg-gray-50"><th class="px-3 py-2 border">Class</th><th class="px-3 py-2 border">Cumulative Value</th><th class="px-3 py-2 border">Typical % of SKUs</th><th class="px-3 py-2 border">Control Level</th></tr>
+                    <tr><td class="px-3 py-1 border font-semibold">A</td><td class="px-3 py-1 border">Top 80%</td><td class="px-3 py-1 border">~15%</td><td class="px-3 py-1 border">Tight (highest service level)</td></tr>
+                    <tr><td class="px-3 py-1 border font-semibold">B</td><td class="px-3 py-1 border">80% - 95%</td><td class="px-3 py-1 border">~17%</td><td class="px-3 py-1 border">Moderate</td></tr>
+                    <tr><td class="px-3 py-1 border font-semibold">C</td><td class="px-3 py-1 border">95% - 100%</td><td class="px-3 py-1 border">~68%</td><td class="px-3 py-1 border">Lean stocking</td></tr></table>
+                    <p class="text-xs text-gray-500"><b>Data source:</b> abc_summary sheet — ranked by Usage = Units x MRP</p>
+                </section>
+
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-[#1F4E79] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">2</span> Service Level & Z-Score Assignment</h3>
+                    <p class="text-sm text-gray-600 mb-2">Each ABC class is assigned a <b>target service level</b> (probability demand is met from stock during lead time). The corresponding Z-score from the standard normal distribution:</p>
+                    <div class="formula-box mb-2" id="zScoreTable"></div>
+                    <p class="text-xs text-gray-500">Z-scores are configurable inputs. Higher Z = more safety stock = higher service level.</p>
+                </section>
+
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-[#1F4E79] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">3</span> Safety Stock Calculation</h3>
+                    <div class="formula-box mb-3">
+                        <p class="font-bold mb-1">Step 1: Convert monthly variability to daily</p>
+                        <p>sigma_daily = sigma_monthly / sqrt(30)</p>
+                        <p class="mt-2 font-bold mb-1">Step 2: Safety Stock</p>
+                        <p>Safety_Stock = Z x sigma_daily x sqrt(Lead_Time_days)</p>
                     </div>
-                </div>
+                    <p class="text-sm text-gray-600"><b>sigma_monthly</b> = STDEV of last 6 months demand (rolling window). <b>Lead Time</b> = production-to-warehouse transfer time (factory and warehouse co-located).</p>
+                </section>
+
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-[#1F4E79] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">4</span> DOH Determination (Analytically Derived)</h3>
+                    <div class="formula-box mb-3">
+                        <p class="font-bold mb-1">MIN Inventory (Reorder Point)</p>
+                        <p>MIN = (Daily_Demand x Lead_Time) + Safety_Stock</p>
+                        <p class="mt-2 font-bold mb-1">MAX Inventory</p>
+                        <p>MAX = MIN + Order_Quantity &nbsp;&nbsp;(where Order_Qty = Avg_Monthly_Demand x Order_Cycle)</p>
+                        <p class="mt-2 font-bold mb-1">Average Inventory</p>
+                        <p>AVG = (MAX + MIN) / 2</p>
+                        <p class="mt-3 font-bold mb-1 text-[#1F4E79]">Days of Holding (DOH)</p>
+                        <p>DOH_MIN = MIN_Inventory / Daily_Demand &nbsp;&nbsp;&larr; minimum holding days at reorder point</p>
+                        <p>DOH_MAX = MAX_Inventory / Daily_Demand &nbsp;&nbsp;&larr; maximum days post-replenishment</p>
+                        <p>DOH_AVG = AVG_Inventory / Daily_Demand &nbsp;&nbsp;&larr; expected holding at any given time</p>
+                    </div>
+                    <p class="text-sm text-gray-600">DOH is <b>not based on judgment</b>. It is a direct mathematical consequence of the safety stock model, service level targets, and observed demand variability.</p>
+                </section>
+
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-[#1F4E79] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">5</span> KGS Conversion & Cross-Validation</h3>
+                    <div class="formula-box mb-3">
+                        <p class="font-bold mb-1">Conversion</p>
+                        <p>Any_KGS_metric = Units_metric x Conversion_Factor (kg/unit)</p>
+                        <p class="mt-2 font-bold mb-1">Cross-validation</p>
+                        <p>DOH computed in Units basis = DOH computed in KGS basis (algebraically identical)</p>
+                    </div>
+                    <p class="text-sm text-gray-600">Conversion factors sourced from BOM / Sales Projection file. KGS view enables warehouse-level capacity planning.</p>
+                </section>
+
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-[#1F4E79] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">6</span> Actual vs Recommended DOH Comparison</h3>
+                    <div class="formula-box mb-3">
+                        <p class="font-bold mb-1">Actual DOH (Observed)</p>
+                        <p>Actual_DOH = Closing_Stock_KGS (latest month) / Daily_Demand_KGS</p>
+                        <p class="mt-2 font-bold mb-1">Variance & Status</p>
+                        <p>DOH_Variance = Actual_DOH - Recommended_DOH_AVG</p>
+                        <p class="mt-1">Status = <span class="status-excess px-1 rounded">EXCESS</span> if Actual > DOH_MAX &nbsp;|&nbsp; <span class="status-optimal px-1 rounded">OPTIMAL</span> if between MIN-MAX &nbsp;|&nbsp; <span class="status-below px-1 rounded">BELOW ROP</span> if Actual &lt; DOH_MIN</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-[#1F4E79] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">7</span> Data Sources & Traceability</h3>
+                    <table class="text-sm border w-full"><tr class="bg-gray-50"><th class="px-3 py-2 border">Source</th><th class="px-3 py-2 border">Data Used</th><th class="px-3 py-2 border">Period</th></tr>
+                    <tr><td class="px-3 py-1 border">Sigma/Sales file</td><td class="px-3 py-1 border">Qty (UNT), Stock_qty (KGS), Amount (Rs) per month</td><td class="px-3 py-1 border">15 months (Jan 2025 - Mar 2026)</td></tr>
+                    <tr><td class="px-3 py-1 border">ABC Analysis file</td><td class="px-3 py-1 border">Category, MRP, Origin, Annual Usage Value</td><td class="px-3 py-1 border">FY 2025-26</td></tr>
+                    <tr><td class="px-3 py-1 border">Sales Projection file</td><td class="px-3 py-1 border">Conversion Factor (kg/unit), Projected Units & KGs</td><td class="px-3 py-1 border">May 2026</td></tr></table>
+                </section>
+
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-[#1F4E79] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">8</span> Authorization & Review Cadence</h3>
+                    <table class="text-sm border w-full"><tr class="bg-gray-50"><th class="px-3 py-2 border">Frequency</th><th class="px-3 py-2 border">Action</th><th class="px-3 py-2 border">Authorized By</th></tr>
+                    <tr><td class="px-3 py-1 border">Monthly</td><td class="px-3 py-1 border">Parameters recomputed on month-close data</td><td class="px-3 py-1 border">Planning Manager</td></tr>
+                    <tr><td class="px-3 py-1 border">Quarterly</td><td class="px-3 py-1 border">ABC reclassification + service level review</td><td class="px-3 py-1 border">SCM Head</td></tr>
+                    <tr><td class="px-3 py-1 border">Annually</td><td class="px-3 py-1 border">Methodology review: Z-scores, lead times, order cycle validated against actuals</td><td class="px-3 py-1 border">SCM Head + Finance/Audit</td></tr></table>
+                </section>
             </div>
         </div>
     </div>
@@ -265,325 +262,150 @@
 <div id="emptyState" class="text-center py-20">
     <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
     <h3 class="text-lg font-medium text-gray-500">Upload your files and click Process Data</h3>
-    <p class="text-sm text-gray-400 mt-2 max-w-md mx-auto">Required: Sales/Sigma data + ABC Analysis. Optional: IDR Projection for forecast comparison.</p>
+    <p class="text-sm text-gray-400 mt-2 max-w-md mx-auto">Required: Sales/Sigma + ABC Analysis. Optional: Sales Projection for KGS conversion and forecast comparison.</p>
 </div>
-
 </main>
 
 <script>
-let DATA = null;
-let activeFilters = { abc: ['A','B','C'], trend: ['Growing','Stable','Declining'], group: 'ALL', origin: 'ALL', search: '', risk: ['HIGH','MEDIUM','LOW'] };
-let devType = 'abs';
+let DATA=null;
+let activeFilters={abc:['A','B','C'],trend:['Growing','Stable','Declining'],doh:['EXCESS','OPTIMAL','BELOW ROP'],group:'ALL',origin:'ALL',search:'',risk:['HIGH','MEDIUM','LOW']};
+let devType='abs';
+const API=window.location.origin;
+function fmt(n){return n==null?'-':Math.round(n).toLocaleString('en-IN')}
+function fmtDec(n,d=1){return n==null?'-':Number(n).toFixed(d)}
+function fmtKgs(n){return n==null?'-':Number(n).toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
+function trunc(s,l=48){return s?(s.length>l?s.slice(0,l)+'...':s):'-'}
 
-const API_BASE = window.location.origin;
-
-function fmt(n) { return n == null ? '-' : Math.round(n).toLocaleString('en-IN'); }
-function fmtDec(n, d=1) { return n == null ? '-' : Number(n).toFixed(d); }
-
-async function processData() {
-    const sigmaFile = document.getElementById('sigmaFile').files[0];
-    const abcFile = document.getElementById('abcFile').files[0];
-    const idrFile = document.getElementById('idrFile').files[0];
-
-    if (!sigmaFile || !abcFile) {
-        document.getElementById('errorMsg').textContent = 'Please upload both Sales/Sigma and ABC files.';
-        document.getElementById('errorMsg').classList.remove('hidden');
-        return;
-    }
-
+async function processData(){
+    const sf=document.getElementById('sigmaFile').files[0],af=document.getElementById('abcFile').files[0],pf=document.getElementById('projFile').files[0];
+    if(!sf||!af){document.getElementById('errorMsg').textContent='Upload both Sales/Sigma and ABC files.';document.getElementById('errorMsg').classList.remove('hidden');return}
     document.getElementById('errorMsg').classList.add('hidden');
-    document.getElementById('loadingIndicator').classList.remove('hidden');
-    document.getElementById('loadingIndicator').classList.add('inline-flex');
-    document.getElementById('processBtn').disabled = true;
-
-    const fd = new FormData();
-    fd.append('sigma_file', sigmaFile);
-    fd.append('abc_file', abcFile);
-    if (idrFile) fd.append('idr_file', idrFile);
-    fd.append('lead_time', document.getElementById('leadTime').value);
-    fd.append('z_a', document.getElementById('zA').value);
-    fd.append('z_b', document.getElementById('zB').value);
-    fd.append('z_c', document.getElementById('zC').value);
-    fd.append('order_cycle', document.getElementById('orderCycle').value);
-
-    try {
-        const res = await fetch(`${API_BASE}/api/process`, { method: 'POST', body: fd });
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        DATA = await res.json();
-        renderAll();
-    } catch (e) {
-        document.getElementById('errorMsg').textContent = `Error: ${e.message}`;
-        document.getElementById('errorMsg').classList.remove('hidden');
-    } finally {
-        document.getElementById('loadingIndicator').classList.add('hidden');
-        document.getElementById('processBtn').disabled = false;
-    }
+    document.getElementById('loadingIndicator').classList.remove('hidden');document.getElementById('loadingIndicator').classList.add('inline-flex');
+    document.getElementById('processBtn').disabled=true;
+    const fd=new FormData();
+    fd.append('sigma_file',sf);fd.append('abc_file',af);
+    if(pf)fd.append('proj_file',pf);
+    fd.append('lead_time',document.getElementById('leadTime').value);
+    fd.append('z_a',document.getElementById('zA').value);
+    fd.append('z_b',document.getElementById('zB').value);
+    fd.append('z_c',document.getElementById('zC').value);
+    fd.append('order_cycle',document.getElementById('orderCycle').value);
+    try{
+        const res=await fetch(`${API}/api/process`,{method:'POST',body:fd});
+        if(!res.ok)throw new Error('Server error: '+res.status);
+        DATA=await res.json();renderAll();
+    }catch(e){document.getElementById('errorMsg').textContent='Error: '+e.message;document.getElementById('errorMsg').classList.remove('hidden')}
+    finally{document.getElementById('loadingIndicator').classList.add('hidden');document.getElementById('processBtn').disabled=false}
 }
 
-function renderAll() {
+function renderAll(){
     document.getElementById('emptyState').classList.add('hidden');
-    document.getElementById('metricsPanel').classList.remove('hidden');
-    document.getElementById('filtersPanel').classList.remove('hidden');
-    document.getElementById('contentPanel').classList.remove('hidden');
-    document.getElementById('downloadSection').classList.remove('hidden');
-    document.getElementById('downloadSection').classList.add('flex');
-
-    buildFilterChips();
-    buildDropdowns();
-    applyFilters();
-    renderSummary();
+    ['metricsPanel','filtersPanel','contentPanel'].forEach(id=>document.getElementById(id).classList.remove('hidden'));
+    document.getElementById('downloadSection').classList.remove('hidden');document.getElementById('downloadSection').classList.add('flex');
+    buildFilterChips();buildDropdowns();applyFilters();renderSummary();renderMethodologyParams();
 }
 
-function buildFilterChips() {
-    const abcDiv = document.getElementById('abcFilters');
-    abcDiv.innerHTML = '';
-    ['A','B','C'].forEach(c => {
-        const btn = document.createElement('button');
-        btn.textContent = c;
-        btn.className = 'filter-chip active px-3 py-1 rounded-lg text-xs cursor-pointer font-medium';
-        btn.onclick = () => toggleFilter('abc', c, btn);
-        abcDiv.appendChild(btn);
-    });
-
-    const trendDiv = document.getElementById('trendFilters');
-    trendDiv.innerHTML = '';
-    ['Growing','Stable','Declining'].forEach(t => {
-        const btn = document.createElement('button');
-        btn.textContent = t;
-        btn.className = 'filter-chip active px-3 py-1 rounded-lg text-xs cursor-pointer font-medium';
-        btn.onclick = () => toggleFilter('trend', t, btn);
-        trendDiv.appendChild(btn);
-    });
-
-    const riskDiv = document.getElementById('riskFilters');
-    riskDiv.innerHTML = '';
-    ['HIGH','MEDIUM','LOW'].forEach(r => {
-        const btn = document.createElement('button');
-        btn.textContent = r;
-        const colors = { HIGH: 'risk-high', MEDIUM: 'risk-medium', LOW: 'risk-low' };
-        btn.className = `filter-chip active px-3 py-1 rounded-lg text-xs cursor-pointer font-medium ${colors[r]}`;
-        btn.onclick = () => toggleFilter('risk', r, btn);
-        riskDiv.appendChild(btn);
-    });
+function buildFilterChips(){
+    const mk=(container,items,filterKey,colorFn)=>{const div=document.getElementById(container);div.innerHTML='';items.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.className='filter-chip active px-3 py-1 rounded-lg text-xs cursor-pointer font-medium'+(colorFn?(' '+colorFn(v)):'');b.onclick=()=>{const a=activeFilters[filterKey],i=a.indexOf(v);if(i>=0){a.splice(i,1);b.classList.remove('active')}else{a.push(v);b.classList.add('active')}applyFilters()};div.appendChild(b)})};
+    mk('abcFilters',['A','B','C'],'abc');
+    mk('trendFilters',['Growing','Stable','Declining'],'trend');
+    mk('dohFilters',['EXCESS','OPTIMAL','BELOW ROP'],'doh',v=>({'EXCESS':'','OPTIMAL':'','BELOW ROP':''}[v]||''));
+    mk('riskFilters',['HIGH','MEDIUM','LOW'],'risk',v=>({'HIGH':'risk-high','MEDIUM':'risk-medium','LOW':'risk-low'}[v]||''));
 }
-
-function buildDropdowns() {
-    const gSel = document.getElementById('groupFilter');
-    gSel.innerHTML = '<option value="ALL">All Groups</option>';
-    DATA.filters.groups.forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = g; opt.textContent = g;
-        gSel.appendChild(opt);
-    });
-
-    const oSel = document.getElementById('originFilter');
-    oSel.innerHTML = '<option value="ALL">All Origins</option>';
-    DATA.filters.origins.forEach(o => {
-        const opt = document.createElement('option');
-        opt.value = o; opt.textContent = o;
-        oSel.appendChild(opt);
-    });
+function buildDropdowns(){
+    const g=document.getElementById('groupFilter');g.innerHTML='<option value="ALL">All Groups</option>';DATA.filters.groups.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;g.appendChild(o)});
+    const o=document.getElementById('originFilter');o.innerHTML='<option value="ALL">All Origins</option>';DATA.filters.origins.forEach(v=>{const op=document.createElement('option');op.value=v;op.textContent=v;o.appendChild(op)});
 }
+function toggleFilter(type,value,btn){const a=activeFilters[type],i=a.indexOf(value);if(i>=0){a.splice(i,1);btn.classList.remove('active')}else{a.push(value);btn.classList.add('active')}applyFilters()}
 
-function toggleFilter(type, value, btn) {
-    const arr = activeFilters[type];
-    const idx = arr.indexOf(value);
-    if (idx >= 0) { arr.splice(idx, 1); btn.classList.remove('active'); }
-    else { arr.push(value); btn.classList.add('active'); }
-    applyFilters();
-}
-
-function applyFilters() {
-    activeFilters.group = document.getElementById('groupFilter').value;
-    activeFilters.origin = document.getElementById('originFilter').value;
-    activeFilters.search = document.getElementById('searchBox').value.toLowerCase();
-
-    const filtered = DATA.inventory.filter(r => {
-        if (!activeFilters.abc.includes(r.ABC_Category)) return false;
-        if (!activeFilters.trend.includes(r.Trend)) return false;
-        if (activeFilters.group !== 'ALL' && r['New MIS ITEM Group'] !== activeFilters.group) return false;
-        if (activeFilters.origin !== 'ALL' && r.Origin !== activeFilters.origin) return false;
-        if (activeFilters.search && !r.Item_Name.toLowerCase().includes(activeFilters.search)) return false;
+function applyFilters(){
+    activeFilters.group=document.getElementById('groupFilter').value;
+    activeFilters.origin=document.getElementById('originFilter').value;
+    activeFilters.search=document.getElementById('searchBox').value.toLowerCase();
+    const f=DATA.inventory.filter(r=>{
+        if(!activeFilters.abc.includes(r.ABC_Category))return false;
+        if(!activeFilters.trend.includes(r.Trend))return false;
+        if(r.DOH_Status&&!activeFilters.doh.includes(r.DOH_Status))return false;
+        if(activeFilters.group!=='ALL'&&r['New MIS ITEM Group']!==activeFilters.group)return false;
+        if(activeFilters.origin!=='ALL'&&r.Origin!==activeFilters.origin)return false;
+        if(activeFilters.search&&!r.Item_Name.toLowerCase().includes(activeFilters.search))return false;
         return true;
     });
-
-    renderMetrics(filtered);
-    renderInventoryTable(filtered);
-    renderDeviations(filtered);
-    renderForecast();
-    document.getElementById('rowCount').textContent = filtered.length;
+    renderMetrics(f);renderInvTable(f);renderKgsTable(f);renderDohTable(f);renderDeviations(f);renderForecast();
+    document.getElementById('rowCount').textContent=f.length;
 }
 
-function renderMetrics(filtered) {
-    let ss = 0, mn = 0, mx = 0, av = 0;
-    filtered.forEach(r => {
-        ss += (r.Safety_Stock_Value || 0);
-        mn += (r.Min_Value || 0);
-        mx += (r.Max_Value || 0);
-        av += (r.Avg_Value || 0);
-    });
-    document.getElementById('metricSKUs').textContent = filtered.length;
-    document.getElementById('metricSS').textContent = `₹${(ss/1e7).toFixed(1)} Cr`;
-    document.getElementById('metricMin').textContent = `₹${(mn/1e7).toFixed(1)} Cr`;
-    document.getElementById('metricMax').textContent = `₹${(mx/1e7).toFixed(1)} Cr`;
-    document.getElementById('metricAvg').textContent = `₹${(av/1e7).toFixed(1)} Cr`;
+function renderMetrics(f){
+    let ss=0,mn=0,mx=0,av=0;f.forEach(r=>{ss+=(r.Safety_Stock_Value||0);mn+=(r.Min_Value||0);mx+=(r.Max_Value||0);av+=(r.Avg_Value||0)});
+    document.getElementById('metricSKUs').textContent=f.length;
+    document.getElementById('metricSS').textContent=`₹${(ss/1e7).toFixed(1)} Cr`;
+    document.getElementById('metricMin').textContent=`₹${(mn/1e7).toFixed(1)} Cr`;
+    document.getElementById('metricMax').textContent=`₹${(mx/1e7).toFixed(1)} Cr`;
+    document.getElementById('metricAvg').textContent=`₹${(av/1e7).toFixed(1)} Cr`;
 }
 
-function renderInventoryTable(filtered) {
-    const cols = [
-        { key: 'Item_Name', label: 'Item', align: 'left', fmt: v => v ? (v.length > 50 ? v.slice(0,50)+'...' : v) : '-' },
-        { key: 'ABC_Category', label: 'ABC', align: 'center', fmt: v => v || '-' },
-        { key: 'New MIS ITEM Group', label: 'Group', align: 'left', fmt: v => v || '-' },
-        { key: 'MRP', label: 'MRP', align: 'right', fmt: fmt },
-        { key: 'Recent_Avg', label: 'Monthly Demand', align: 'right', fmt: fmt },
-        { key: 'CoV', label: 'CoV', align: 'right', fmt: v => fmtDec(v, 2) },
-        { key: 'Safety_Stock', label: 'Safety Stock', align: 'right', fmt: fmt },
-        { key: 'Min_Inventory_ROP', label: 'MIN (ROP)', align: 'right', fmt: fmt },
-        { key: 'Order_Qty', label: 'Order Qty', align: 'right', fmt: fmt },
-        { key: 'Max_Inventory', label: 'MAX', align: 'right', fmt: fmt },
-        { key: 'Avg_Inventory', label: 'Avg Inventory', align: 'right', fmt: fmt },
-        { key: 'Days_of_Supply_Min', label: 'DoS Min', align: 'right', fmt: v => fmtDec(v) },
-        { key: 'Days_of_Supply_Max', label: 'DoS Max', align: 'right', fmt: v => fmtDec(v) },
-        { key: 'Safety_Stock_Value', label: 'SS Value', align: 'right', fmt: fmt },
-        { key: 'Trend', label: 'Trend', align: 'center', fmt: v => `<span class="trend-${(v||'').toLowerCase()}">${v||'-'}</span>` },
-    ];
-
-    const thead = document.getElementById('invHead');
-    thead.innerHTML = '<tr>' + cols.map(c => `<th class="px-3 py-2 text-${c.align} whitespace-nowrap text-xs">${c.label}</th>`).join('') + '</tr>';
-
-    const tbody = document.getElementById('invBody');
-    tbody.innerHTML = filtered.map(r =>
-        '<tr class="hover:bg-gray-50">' + cols.map(c =>
-            `<td class="px-3 py-2 text-${c.align} whitespace-nowrap">${c.fmt(r[c.key])}</td>`
-        ).join('') + '</tr>'
-    ).join('');
+function renderInvTable(f){
+    const cols=[{k:'Item_Name',l:'Item',a:'left',f:v=>trunc(v)},{k:'ABC_Category',l:'ABC',a:'center'},{k:'New MIS ITEM Group',l:'Group',a:'left'},{k:'MRP',l:'MRP',a:'right',f:fmt},{k:'Recent_Avg',l:'Demand/M',a:'right',f:fmt},{k:'CoV',l:'CoV',a:'right',f:v=>fmtDec(v,2)},{k:'Safety_Stock',l:'Safety Stock',a:'right',f:fmt},{k:'Min_Inventory_ROP',l:'MIN(ROP)',a:'right',f:fmt},{k:'Order_Qty',l:'Order Qty',a:'right',f:fmt},{k:'Max_Inventory',l:'MAX',a:'right',f:fmt},{k:'Avg_Inventory',l:'Avg Inv',a:'right',f:fmt},{k:'DOH_MIN',l:'DOH Min',a:'right',f:v=>fmtDec(v)},{k:'DOH_MAX',l:'DOH Max',a:'right',f:v=>fmtDec(v)},{k:'DOH_AVG',l:'DOH Avg',a:'right',f:v=>fmtDec(v)},{k:'Trend',l:'Trend',a:'center',f:v=>`<span class="trend-${(v||'').toLowerCase()}">${v||'-'}</span>`}];
+    document.getElementById('invHead').innerHTML='<tr>'+cols.map(c=>`<th class="px-3 py-2 text-${c.a} whitespace-nowrap text-xs">${c.l}</th>`).join('')+'</tr>';
+    document.getElementById('invBody').innerHTML=f.map(r=>'<tr class="hover:bg-gray-50">'+cols.map(c=>`<td class="px-3 py-1.5 text-${c.a} whitespace-nowrap">${(c.f||String)(r[c.k])}</td>`).join('')+'</tr>').join('');
 }
 
-function renderDeviations(filtered) {
-    if (!DATA.dev_months) return;
-    const prefix = devType === 'abs' ? 'Dev_' : 'PctDev_';
-    const fmtFn = devType === 'abs' ? fmt : v => fmtDec(v);
-
-    const names = filtered.map(r => r.Item_Name);
-    const devFiltered = DATA.deviations.filter(d => names.includes(d.Item_Name));
-
-    const thead = document.getElementById('devHead');
-    thead.innerHTML = '<tr><th class="px-3 py-2 text-left text-xs">Item</th><th class="px-3 py-2 text-center text-xs">ABC</th>' +
-        DATA.dev_months.map(m => `<th class="px-3 py-2 text-right text-xs whitespace-nowrap">${m}</th>`).join('') + '</tr>';
-
-    const tbody = document.getElementById('devBody');
-    tbody.innerHTML = devFiltered.map(r => {
-        const cells = DATA.dev_months.map(m => {
-            const val = r[prefix + m];
-            const color = val > 0 ? 'text-green-600' : (val < 0 ? 'text-red-600' : '');
-            return `<td class="px-3 py-1.5 text-right whitespace-nowrap ${color}">${fmtFn(val)}</td>`;
-        }).join('');
-        const name = r.Item_Name.length > 45 ? r.Item_Name.slice(0,45)+'...' : r.Item_Name;
-        return `<tr class="hover:bg-gray-50"><td class="px-3 py-1.5 whitespace-nowrap">${name}</td><td class="px-3 py-1.5 text-center">${r.ABC_Category||'-'}</td>${cells}</tr>`;
-    }).join('');
+function renderKgsTable(f){
+    const cols=[{k:'Item_Name',l:'Item',a:'left',f:v=>trunc(v)},{k:'ABC_Category',l:'ABC',a:'center'},{k:'Conversion_Factor',l:'CF(kg/u)',a:'right',f:v=>v?Number(v).toFixed(3):'-'},{k:'Avg_Demand_KGS',l:'Demand KGS/M',a:'right',f:v=>fmtKgs(v)},{k:'Daily_Demand_KGS',l:'Daily KGS',a:'right',f:v=>fmtKgs(v)},{k:'Safety_Stock_KGS',l:'SS KGS',a:'right',f:v=>fmtKgs(v)},{k:'Min_Inventory_KGS',l:'MIN KGS',a:'right',f:v=>fmtKgs(v)},{k:'Max_Inventory_KGS',l:'MAX KGS',a:'right',f:v=>fmtKgs(v)},{k:'Avg_Inventory_KGS',l:'Avg KGS',a:'right',f:v=>fmtKgs(v)},{k:'DOH_KGS_MIN',l:'DOH Min',a:'right',f:v=>fmtDec(v)},{k:'DOH_KGS_MAX',l:'DOH Max',a:'right',f:v=>fmtDec(v)},{k:'DOH_KGS_AVG',l:'DOH Avg',a:'right',f:v=>fmtDec(v)}];
+    document.getElementById('kgsHead').innerHTML='<tr>'+cols.map(c=>`<th class="px-3 py-2 text-${c.a} whitespace-nowrap text-xs">${c.l}</th>`).join('')+'</tr>';
+    document.getElementById('kgsBody').innerHTML=f.map(r=>'<tr class="hover:bg-gray-50">'+cols.map(c=>`<td class="px-3 py-1.5 text-${c.a} whitespace-nowrap">${(c.f||String)(r[c.k])}</td>`).join('')+'</tr>').join('');
 }
 
-function switchDevType(type) {
-    devType = type;
-    document.querySelectorAll('.dev-type-btn').forEach(b => {
-        b.classList.toggle('active', (type === 'abs' && b.textContent.includes('Absolute')) || (type === 'pct' && b.textContent.includes('Percentage')));
-    });
-    applyFilters();
+function renderDohTable(f){
+    const cols=[{k:'Item_Name',l:'Item',a:'left',f:v=>trunc(v)},{k:'ABC_Category',l:'ABC',a:'center'},{k:'Origin',l:'Origin',a:'left'},{k:'DOH_MIN',l:'DOH MIN (Rec)',a:'right',f:v=>fmtDec(v)},{k:'DOH_MAX',l:'DOH MAX (Rec)',a:'right',f:v=>fmtDec(v)},{k:'DOH_AVG',l:'DOH AVG (Rec)',a:'right',f:v=>fmtDec(v)},{k:'Actual_DOH_Latest',l:'Actual DOH',a:'right',f:v=>fmtDec(v)},{k:'DOH_Variance',l:'Variance',a:'right',f:v=>{if(v==null)return'-';const cl=v>0?'text-red-600':'text-green-600';return`<span class="${cl}">${v>0?'+':''}${Number(v).toFixed(1)}</span>`}},{k:'DOH_Status',l:'Status',a:'center',f:v=>{const m={'EXCESS':'status-excess','OPTIMAL':'status-optimal','BELOW ROP':'status-below'};return`<span class="px-2 py-0.5 rounded text-xs font-medium ${m[v]||''}">${v||'-'}</span>`}}];
+    document.getElementById('dohHead').innerHTML='<tr>'+cols.map(c=>`<th class="px-3 py-2 text-${c.a} whitespace-nowrap text-xs">${c.l}</th>`).join('')+'</tr>';
+    document.getElementById('dohBody').innerHTML=f.map(r=>'<tr class="hover:bg-gray-50">'+cols.map(c=>`<td class="px-3 py-1.5 text-${c.a} whitespace-nowrap">${(c.f||String)(r[c.k])}</td>`).join('')+'</tr>').join('');
 }
 
-function renderForecast() {
-    if (!DATA.forecast) return;
-    const filtered = DATA.forecast.filter(r => activeFilters.risk.includes(r.Risk));
+function renderDeviations(f){
+    if(!DATA.dev_months)return;
+    const prefix=devType==='abs'?'Dev_':(devType==='pct'?'PctDev_':'StockDev_');
+    const fmtFn=devType==='abs'?fmt:(devType==='pct'?v=>fmtDec(v):v=>fmtKgs(v));
+    const names=f.map(r=>r.Item_Name);
+    const df=DATA.deviations.filter(d=>names.includes(d.Item_Name));
+    document.getElementById('devHead').innerHTML='<tr><th class="px-3 py-2 text-left text-xs">Item</th><th class="px-3 py-2 text-center text-xs">ABC</th>'+DATA.dev_months.map(m=>`<th class="px-3 py-2 text-right text-xs whitespace-nowrap">${m}</th>`).join('')+'</tr>';
+    document.getElementById('devBody').innerHTML=df.map(r=>{
+        const cells=DATA.dev_months.map(m=>{const v=r[prefix+m];const cl=v>0?'text-green-600':(v<0?'text-red-600':'');return`<td class="px-3 py-1.5 text-right whitespace-nowrap ${cl}">${fmtFn(v)}</td>`}).join('');
+        return`<tr class="hover:bg-gray-50"><td class="px-3 py-1.5 whitespace-nowrap">${trunc(r.Item_Name,40)}</td><td class="px-3 py-1.5 text-center">${r.ABC_Category||'-'}</td>${cells}</tr>`}).join('');
+}
+function switchDevType(t){devType=t;document.querySelectorAll('.dev-type-btn').forEach(b=>{b.classList.toggle('active',b.textContent.includes(t==='abs'?'Absolute':(t==='pct'?'Percentage':'Stock')))});applyFilters()}
 
-    const tbody = document.getElementById('fcBody');
-    tbody.innerHTML = filtered.map(r => {
-        const riskClass = { HIGH: 'risk-high', MEDIUM: 'risk-medium', LOW: 'risk-low' }[r.Risk] || '';
-        const name = r.Item_Name.length > 45 ? r.Item_Name.slice(0,45)+'...' : r.Item_Name;
-        return `<tr class="hover:bg-gray-50">
-            <td class="px-3 py-2">${name}</td>
-            <td class="px-3 py-2 text-center">${r.ABC_Category||'-'}</td>
-            <td class="px-3 py-2">${r['New MIS ITEM Group']||'-'}</td>
-            <td class="px-3 py-2 text-right">${fmt(r.Recent_Avg)}</td>
-            <td class="px-3 py-2 text-right">${fmt(r.Projection_Units)}</td>
-            <td class="px-3 py-2 text-right">${fmt(r.Deviation_Units)}</td>
-            <td class="px-3 py-2 text-right">${fmtDec(r.Deviation_Pct)}</td>
-            <td class="px-3 py-2 text-center"><span class="px-2 py-0.5 rounded text-xs font-medium ${riskClass}">${r.Risk}</span></td>
-        </tr>`;
-    }).join('');
+function renderForecast(){
+    if(!DATA.forecast)return;
+    const f=DATA.forecast.filter(r=>activeFilters.risk.includes(r.Risk));
+    document.getElementById('fcBody').innerHTML=f.map(r=>{
+        const rc={'HIGH':'risk-high','MEDIUM':'risk-medium','LOW':'risk-low'}[r.Risk]||'';
+        return`<tr class="hover:bg-gray-50"><td class="px-3 py-2">${trunc(r.Item_Name,40)}</td><td class="px-3 py-2 text-center">${r.ABC_Category||'-'}</td><td class="px-3 py-2">${r['New MIS ITEM Group']||'-'}</td><td class="px-3 py-2 text-right">${fmt(r.Recent_Avg)}</td><td class="px-3 py-2 text-right">${fmt(r.Projection_Units)}</td><td class="px-3 py-2 text-right">${fmtKgs(r.Projection_KGS)}</td><td class="px-3 py-2 text-right">${fmtDec(r.Deviation_Pct)}</td><td class="px-3 py-2 text-center"><span class="px-2 py-0.5 rounded text-xs font-medium ${rc}">${r.Risk}</span></td></tr>`}).join('');
 }
 
-function renderSummary() {
-    const tbody = document.getElementById('summaryBody');
-    tbody.innerHTML = '';
-    ['A','B','C'].forEach(cat => {
-        const s = DATA.summary[cat];
-        if (!s) return;
-        tbody.innerHTML += `<tr class="border-b">
-            <td class="py-2 font-semibold">${cat}</td>
-            <td class="py-2 text-right">${s.count}</td>
-            <td class="py-2 text-right">${s.sl}</td>
-            <td class="py-2 text-right">₹${s.total_ss_cr}</td>
-            <td class="py-2 text-right">₹${s.total_min_cr}</td>
-            <td class="py-2 text-right">₹${s.total_max_cr}</td>
-            <td class="py-2 text-right">${s.avg_dos}d</td>
-            <td class="py-2 text-center text-xs">
-                <span class="trend-growing">${s.growing}G</span> /
-                <span class="trend-declining">${s.declining}D</span> /
-                <span class="trend-stable">${s.stable}S</span>
-            </td>
-        </tr>`;
-    });
-
-    const lt = document.getElementById('leadTime').value;
-    const oc = document.getElementById('orderCycle').value;
-    const params = [
-        ['Lead Time', `${lt} days`, 'Factory & warehouse co-located'],
-        ['Order Cycle', `${oc} month(s)`, 'Replenishment frequency'],
-        ['Z-Score A', document.getElementById('zA').value, `SL: 95%`],
-        ['Z-Score B', document.getElementById('zB').value, `SL: 90%`],
-        ['Z-Score C', document.getElementById('zC').value, `SL: 85%`],
-        ['Demand Window', 'Recent 6 months', 'Rolling basis for SS'],
-    ];
-    document.getElementById('paramsBody').innerHTML = params.map(p =>
-        `<tr class="border-b"><td class="py-2">${p[0]}</td><td class="py-2 font-medium">${p[1]}</td><td class="py-2 text-gray-500">${p[2]}</td></tr>`
-    ).join('');
+function renderSummary(){
+    const tb=document.getElementById('summaryBody');tb.innerHTML='';
+    ['A','B','C'].forEach(cat=>{const s=DATA.summary[cat];if(!s)return;
+        tb.innerHTML+=`<tr class="border-b"><td class="py-2 font-semibold">${cat}</td><td class="py-2 text-right">${s.count}</td><td class="py-2 text-right">${s.sl}</td><td class="py-2 text-right">₹${s.total_ss_cr}</td><td class="py-2 text-right">${s.avg_doh_min}-${s.avg_doh_max}d</td><td class="py-2 text-center text-xs"><span class="status-optimal px-1 rounded">${s.optimal_count}</span> / <span class="status-excess px-1 rounded">${s.excess_count}</span> / <span class="status-below px-1 rounded">${s.below_count}</span></td><td class="py-2 text-center text-xs"><span class="trend-growing">${s.growing}G</span>/<span class="trend-declining">${s.declining}D</span>/<span class="trend-stable">${s.stable}S</span></td></tr>`});
+    const p=DATA.params;
+    const params=[['Lead Time',`${p.lead_time} days`,'Factory & warehouse co-located'],['Order Cycle',`${p.order_cycle} month(s)`,'Replenishment frequency'],['Z-Score A',`${p.z_scores[0]}`,'95% SL'],['Z-Score B',`${p.z_scores[1]}`,'90% SL'],['Z-Score C',`${p.z_scores[2]}`,'85% SL'],['Demand Window','Recent 6 months','Rolling basis for SS calculation'],['Methodology','Statistical (Z*sigma*sqrt(LT))','Not judgment-based']];
+    document.getElementById('paramsBody').innerHTML=params.map(r=>`<tr class="border-b"><td class="py-2">${r[0]}</td><td class="py-2 font-medium">${r[1]}</td><td class="py-2 text-gray-500">${r[2]}</td></tr>`).join('');
 }
 
-function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.toggle('tab-active', b.dataset.tab === tab);
-        b.classList.toggle('tab-inactive', b.dataset.tab !== tab);
-    });
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    document.getElementById('tab-' + tab).classList.remove('hidden');
+function renderMethodologyParams(){
+    if(!DATA||!DATA.params)return;
+    const p=DATA.params;
+    document.getElementById('zScoreTable').innerHTML=`<table class="w-full text-sm"><tr><th class="text-left">Class</th><th>Z-Score</th><th>Service Level</th></tr><tr><td class="font-semibold">A</td><td>${p.z_scores[0]}</td><td>95%</td></tr><tr><td class="font-semibold">B</td><td>${p.z_scores[1]}</td><td>90%</td></tr><tr><td class="font-semibold">C</td><td>${p.z_scores[2]}</td><td>85%</td></tr></table><p class="mt-1 text-xs">Lead Time: ${p.lead_time} days | Order Cycle: ${p.order_cycle} month(s)</p>`;
 }
 
-function downloadExcel() {
-    window.open(`${API_BASE}/api/download`, '_blank');
-}
-
-function downloadCSV() {
-    if (!DATA) return;
-    const headers = ['Item_Name','ABC_Category','Group','Origin','MRP','Monthly_Demand','CoV',
-                     'Safety_Stock','MIN_ROP','Order_Qty','MAX','Avg_Inventory','DoS_Avg','SS_Value','Trend'];
-    const keys = ['Item_Name','ABC_Category','New MIS ITEM Group','Origin','MRP','Recent_Avg','CoV',
-                  'Safety_Stock','Min_Inventory_ROP','Order_Qty','Max_Inventory','Avg_Inventory','Days_of_Supply_Avg','Safety_Stock_Value','Trend'];
-
-    let csv = headers.join(',') + '\n';
-    DATA.inventory.forEach(r => {
-        csv += keys.map(k => {
-            const v = r[k];
-            if (v == null) return '';
-            if (typeof v === 'string' && v.includes(',')) return `"${v}"`;
-            return v;
-        }).join(',') + '\n';
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'Farmley_Inventory_Filtered.csv';
-    a.click();
+function switchTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.toggle('tab-active',b.dataset.tab===tab);b.classList.toggle('tab-inactive',b.dataset.tab!==tab)});document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'));document.getElementById('tab-'+tab).classList.remove('hidden')}
+function downloadExcel(){window.open(`${API}/api/download`,'_blank')}
+function downloadCSV(){
+    if(!DATA)return;
+    const h=['Item_Name','ABC','Group','Origin','MRP','Demand_Units','Demand_KGS','CoV','Safety_Stock','SS_KGS','MIN_ROP','MIN_KGS','MAX','MAX_KGS','Avg_Inv','Avg_KGS','DOH_MIN','DOH_MAX','DOH_AVG','Actual_DOH','DOH_Status','Trend'];
+    const k=['Item_Name','ABC_Category','New MIS ITEM Group','Origin','MRP','Recent_Avg','Avg_Demand_KGS','CoV','Safety_Stock','Safety_Stock_KGS','Min_Inventory_ROP','Min_Inventory_KGS','Max_Inventory','Max_Inventory_KGS','Avg_Inventory','Avg_Inventory_KGS','DOH_MIN','DOH_MAX','DOH_AVG','Actual_DOH_Latest','DOH_Status','Trend'];
+    let csv=h.join(',')+'\n';DATA.inventory.forEach(r=>{csv+=k.map(key=>{const v=r[key];if(v==null)return'';if(typeof v==='string'&&v.includes(','))return`"${v}"`;return v}).join(',')+'\n'});
+    const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Farmley_Inventory_Full.csv';a.click();
 }
 </script>
 </body>
