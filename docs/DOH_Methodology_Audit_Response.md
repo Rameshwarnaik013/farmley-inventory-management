@@ -93,13 +93,15 @@ This formula assumes demand follows a normal distribution and provides protectio
 ### 4.4 Order Cycle Justification
 | Parameter | Value | Rationale |
 |-----------|-------|-----------|
-| Order Cycle | 7 days | Production happens daily based on projected demand; planning is reviewed weekly |
+| Order Cycle | 1 day | Sales orders received daily for all SKUs; production and dispatch happen daily |
 
-The 7-day order cycle means the MAX inventory = MIN + 7 days of demand. This is appropriate because:
-- Production is continuous (daily batches based on projections)
-- Weekly planning reviews adjust daily production schedules
-- A 7-day buffer above ROP provides adequate coverage between planning reviews
-- This results in DOH bands of approximately 3-12 days (depending on demand variability)
+The 1-day order cycle means MAX inventory = MIN + 1 day of demand. This is appropriate because:
+- Sales orders are received daily for all SKUs
+- Production happens daily based on projected demand + actual orders
+- FG is dispatched daily to fulfill orders
+- Since replenishment happens every day, only 1 day of cycle stock is needed above the reorder point
+- Safety stock (statistically computed) handles demand variability
+- This results in DOH bands of approximately 3-5 days (lean operation with daily replenishment)
 
 ### 4.4 Demand Window
 - Rolling 6-month historical data (currently Oct 2025 – Mar 2026)
@@ -115,7 +117,7 @@ The 7-day order cycle means the MAX inventory = MIN + 7 days of demand. This is 
 |-----------|---------|---------|
 | **MIN (Reorder Point)** | (Daily Demand × Lead Time) + Safety Stock | Trigger point for replenishment |
 | **MAX Inventory** | MIN + Order Quantity | Upper inventory limit |
-| **Order Quantity** | Daily Demand × 7 days | Weekly cycle stock (production is daily, planning reviewed weekly) |
+| **Order Quantity** | Daily Demand × 1 day | Daily cycle stock (orders, production & dispatch all happen daily) |
 | **AVG Inventory** | (MAX + MIN) / 2 | Expected steady-state inventory |
 
 ### 5.2 DOH Derivation

@@ -429,7 +429,7 @@ def build_formula_excel(inv_df, months, lead_time, z_scores, order_cycle):
         ['4.2', 'DOH_MAX = MAX_Inventory / Daily_Demand', 'Maximum days of holding post-replenishment'],
         ['4.3', 'DOH_AVG = Avg_Inventory / Daily_Demand', 'Expected average holding duration at any point in time'],
         ['4.4', 'MIN_Inventory (ROP) = (Daily_Demand x LT) + Safety_Stock', 'Reorder trigger — minimum stock before next batch arrives'],
-        ['4.5', f'Order_Qty = Daily_Demand x {int(order_cycle*30)} days ({order_cycle:.3f} months)', 'Cycle stock = 7-day demand; production is daily, planning reviewed weekly'],
+        ['4.5', f'Order_Qty = Daily_Demand x {int(order_cycle*30)} day(s)', 'Cycle stock = 1 day; orders received daily, production & dispatch daily'],
         ['4.6', 'MAX_Inventory = MIN + Order_Qty', 'Upper bound immediately after replenishment'],
         ['4.7', 'Avg_Inventory = (MAX + MIN) / 2', 'Expected inventory under continuous review model'],
         ['', '', ''],
@@ -485,7 +485,7 @@ async def process_files(
     z_a: float = Form(1.65),
     z_b: float = Form(1.28),
     z_c: float = Form(1.04),
-    order_cycle_days: float = Form(7),
+    order_cycle_days: float = Form(1),
 ):
     sigma_bytes = await sigma_file.read()
     abc_bytes = await abc_file.read()
