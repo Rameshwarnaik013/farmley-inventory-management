@@ -82,11 +82,24 @@ This formula assumes demand follows a normal distribution and provides protectio
 ### 4.3 Lead Time Justification
 | Origin   | Lead Time (Days) | Rationale |
 |----------|-----------------|-----------|
-| Indore   | 2               | Factory & warehouse co-located |
-| Purnea   | 2               | Factory & warehouse co-located |
-| Udupi    | 2               | Factory & warehouse co-located |
-| Jaipur   | 2               | Factory & warehouse co-located |
-| Lucknow  | 2               | Factory & warehouse co-located |
+| Indore   | 2               | Production is continuous/daily; LT = process + pack + move to FG warehouse |
+| Purnea   | 2               | Production is continuous/daily; LT = process + pack + move to FG warehouse |
+| Udupi    | 2               | Production is continuous/daily; LT = process + pack + move to FG warehouse |
+| Jaipur   | 2               | Production is continuous/daily; LT = process + pack + move to FG warehouse |
+| Lucknow  | 2               | Production is continuous/daily; LT = process + pack + move to FG warehouse |
+
+**Note:** While the full production cycle from raw material to finished good is 25-30 days, since production is a continuous daily pipeline, the effective FG replenishment lead time is only 2 days (time from production signal to FG available in warehouse). New FG exits the pipeline daily.
+
+### 4.4 Order Cycle Justification
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| Order Cycle | 7 days | Production happens daily based on projected demand; planning is reviewed weekly |
+
+The 7-day order cycle means the MAX inventory = MIN + 7 days of demand. This is appropriate because:
+- Production is continuous (daily batches based on projections)
+- Weekly planning reviews adjust daily production schedules
+- A 7-day buffer above ROP provides adequate coverage between planning reviews
+- This results in DOH bands of approximately 3-12 days (depending on demand variability)
 
 ### 4.4 Demand Window
 - Rolling 6-month historical data (currently Oct 2025 – Mar 2026)
@@ -102,7 +115,7 @@ This formula assumes demand follows a normal distribution and provides protectio
 |-----------|---------|---------|
 | **MIN (Reorder Point)** | (Daily Demand × Lead Time) + Safety Stock | Trigger point for replenishment |
 | **MAX Inventory** | MIN + Order Quantity | Upper inventory limit |
-| **Order Quantity** | 1 month average demand | Replenishment batch size |
+| **Order Quantity** | Daily Demand × 7 days | Weekly cycle stock (production is daily, planning reviewed weekly) |
 | **AVG Inventory** | (MAX + MIN) / 2 | Expected steady-state inventory |
 
 ### 5.2 DOH Derivation

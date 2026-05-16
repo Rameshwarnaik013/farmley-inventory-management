@@ -421,7 +421,7 @@ def build_formula_excel(inv_df, months, lead_time, z_scores, order_cycle):
         ['3.0', 'SAFETY STOCK CALCULATION', 'Buffer inventory to absorb demand variability during lead time'],
         ['3.1', 'sigma_daily = sigma_monthly / sqrt(30)', 'Convert monthly std deviation to daily granularity'],
         ['3.2', f'Safety Stock = Z x sigma_daily x sqrt(LT)', 'Statistical safety stock under normal distribution assumption'],
-        ['3.3', f'Lead Time = {lead_time} days', 'Factory and warehouse are co-located — replenishment is production lead time only'],
+        ['3.3', f'Lead Time = {lead_time} days', 'Production is continuous (daily); LT = time to process, pack & move FG to warehouse'],
         ['3.4', 'sigma_monthly = STDEV(last 6 months demand)', 'Rolling 6-month window captures recent demand pattern'],
         ['', '', ''],
         ['4.0', 'DOH DETERMINATION (ANALYTICALLY DERIVED)', ''],
@@ -429,7 +429,7 @@ def build_formula_excel(inv_df, months, lead_time, z_scores, order_cycle):
         ['4.2', 'DOH_MAX = MAX_Inventory / Daily_Demand', 'Maximum days of holding post-replenishment'],
         ['4.3', 'DOH_AVG = Avg_Inventory / Daily_Demand', 'Expected average holding duration at any point in time'],
         ['4.4', 'MIN_Inventory (ROP) = (Daily_Demand x LT) + Safety_Stock', 'Reorder trigger — minimum stock before next batch arrives'],
-        ['4.5', f'Order_Qty = Monthly_Avg_Demand x {order_cycle}', 'Cycle stock based on replenishment frequency'],
+        ['4.5', f'Order_Qty = Daily_Demand x {int(order_cycle*30)} days ({order_cycle:.3f} months)', 'Cycle stock = 7-day demand; production is daily, planning reviewed weekly'],
         ['4.6', 'MAX_Inventory = MIN + Order_Qty', 'Upper bound immediately after replenishment'],
         ['4.7', 'Avg_Inventory = (MAX + MIN) / 2', 'Expected inventory under continuous review model'],
         ['', '', ''],
@@ -485,7 +485,7 @@ async def process_files(
     z_a: float = Form(1.65),
     z_b: float = Form(1.28),
     z_c: float = Form(1.04),
-    order_cycle: float = Form(1.0),
+    order_cycle_days: float = Form(7),
 ):
     sigma_bytes = await sigma_file.read()
     abc_bytes = await abc_file.read()
@@ -509,11 +509,12 @@ async def process_files(
                 proj_df = None
 
     z_scores = [z_a, z_b, z_c]
+    order_cycle = order_cycle_days / 30  # Convert days to fraction of month
     inv_df, months = compute_inventory(sigma_df, abc_df, proj_df, lead_time, z_scores, order_cycle)
 
     CACHE['inv_df'] = inv_df
     CACHE['months'] = months
-    CACHE['params'] = {'lead_time': lead_time, 'z_scores': z_scores, 'order_cycle': order_cycle}
+    CACHE['params'] = {'lead_time': lead_time, 'z_scores': z_scores, 'order_cycle': order_cycle, 'order_cycle_days': order_cycle_days}
 
     # Build JSON response
     inv_cols = ['Item_Name', 'ABC_Category', 'New MIS ITEM Group', 'Origin', 'MRP',
@@ -608,7 +609,7 @@ async def process_files(
         'filters': {'groups': groups, 'origins': origins},
         'months': months,
         'dev_months': dev_months,
-        'params': {'lead_time': lead_time, 'z_scores': z_scores, 'order_cycle': order_cycle},
+        'params': {'lead_time': lead_time, 'z_scores': z_scores, 'order_cycle': order_cycle, 'order_cycle_days': order_cycle_days},
     })
 
 

@@ -82,7 +82,7 @@
     </div>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <div><label class="block text-xs font-medium text-gray-600 mb-1">Lead Time (days)</label><input type="number" id="leadTime" value="2" min="1" max="30" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
-        <div><label class="block text-xs font-medium text-gray-600 mb-1">Order Cycle (months)</label><input type="number" id="orderCycle" value="1" min="0.5" max="3" step="0.5" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
+        <div><label class="block text-xs font-medium text-gray-600 mb-1">Order Cycle (days)</label><input type="number" id="orderCycle" value="7" min="1" max="30" step="1" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
         <div><label class="block text-xs font-medium text-gray-600 mb-1">Z-Score A (95% SL)</label><input type="number" id="zA" value="1.65" min="1" max="3" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
         <div><label class="block text-xs font-medium text-gray-600 mb-1">Z-Score B (90% SL)</label><input type="number" id="zB" value="1.28" min="1" max="3" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
         <div><label class="block text-xs font-medium text-gray-600 mb-1">Z-Score C (85% SL)</label><input type="number" id="zC" value="1.04" min="0.5" max="2" step="0.05" class="w-full border rounded-lg px-3 py-2 text-sm search-box"></div>
@@ -196,7 +196,7 @@
                         <p class="mt-2 font-bold mb-1">Step 2: Safety Stock</p>
                         <p>Safety_Stock = Z x sigma_daily x sqrt(Lead_Time_days)</p>
                     </div>
-                    <p class="text-sm text-gray-600"><b>sigma_monthly</b> = STDEV of last 6 months demand (rolling window). <b>Lead Time</b> = production-to-warehouse transfer time (factory and warehouse co-located).</p>
+                    <p class="text-sm text-gray-600"><b>sigma_monthly</b> = STDEV of last 6 months demand (rolling window). <b>Lead Time = 2 days</b> (time to process, pack & move to FG warehouse; production is continuous/daily).</p>
                 </section>
 
                 <section>
@@ -205,7 +205,7 @@
                         <p class="font-bold mb-1">MIN Inventory (Reorder Point)</p>
                         <p>MIN = (Daily_Demand x Lead_Time) + Safety_Stock</p>
                         <p class="mt-2 font-bold mb-1">MAX Inventory</p>
-                        <p>MAX = MIN + Order_Quantity &nbsp;&nbsp;(where Order_Qty = Avg_Monthly_Demand x Order_Cycle)</p>
+                        <p>MAX = MIN + Order_Quantity &nbsp;&nbsp;(where Order_Qty = Daily_Demand x Order_Cycle_Days, default 7 days)</p>
                         <p class="mt-2 font-bold mb-1">Average Inventory</p>
                         <p>AVG = (MAX + MIN) / 2</p>
                         <p class="mt-3 font-bold mb-1 text-[#1F4E79]">Days of Holding (DOH)</p>
@@ -289,7 +289,7 @@ async function processData(){
     fd.append('z_a',document.getElementById('zA').value);
     fd.append('z_b',document.getElementById('zB').value);
     fd.append('z_c',document.getElementById('zC').value);
-    fd.append('order_cycle',document.getElementById('orderCycle').value);
+    fd.append('order_cycle_days',document.getElementById('orderCycle').value);
     try{
         const res=await fetch(`${API}/api/process`,{method:'POST',body:fd});
         if(!res.ok)throw new Error('Server error: '+res.status);
@@ -388,7 +388,7 @@ function renderSummary(){
     ['A','B','C'].forEach(cat=>{const s=DATA.summary[cat];if(!s)return;
         tb.innerHTML+=`<tr class="border-b"><td class="py-2 font-semibold">${cat}</td><td class="py-2 text-right">${s.count}</td><td class="py-2 text-right">${s.sl}</td><td class="py-2 text-right">₹${s.total_ss_cr}</td><td class="py-2 text-right">${s.avg_doh_min}-${s.avg_doh_max}d</td><td class="py-2 text-center text-xs"><span class="status-optimal px-1 rounded">${s.optimal_count}</span> / <span class="status-excess px-1 rounded">${s.excess_count}</span> / <span class="status-below px-1 rounded">${s.below_count}</span></td><td class="py-2 text-center text-xs"><span class="trend-growing">${s.growing}G</span>/<span class="trend-declining">${s.declining}D</span>/<span class="trend-stable">${s.stable}S</span></td></tr>`});
     const p=DATA.params;
-    const params=[['Lead Time',`${p.lead_time} days`,'Factory & warehouse co-located'],['Order Cycle',`${p.order_cycle} month(s)`,'Replenishment frequency'],['Z-Score A',`${p.z_scores[0]}`,'95% SL'],['Z-Score B',`${p.z_scores[1]}`,'90% SL'],['Z-Score C',`${p.z_scores[2]}`,'85% SL'],['Demand Window','Recent 6 months','Rolling basis for SS calculation'],['Methodology','Statistical (Z*sigma*sqrt(LT))','Not judgment-based']];
+    const params=[['Lead Time',`${p.lead_time} days`,'Process + pack + move to FG warehouse (continuous production)'],['Order Cycle',`${p.order_cycle_days} days`,'Weekly planning cycle; production is daily, planning reviewed weekly'],['Z-Score A',`${p.z_scores[0]}`,'95% SL'],['Z-Score B',`${p.z_scores[1]}`,'90% SL'],['Z-Score C',`${p.z_scores[2]}`,'85% SL'],['Demand Window','Recent 6 months','Rolling basis for SS calculation'],['Methodology','Statistical (Z*sigma*sqrt(LT))','Not judgment-based']];
     document.getElementById('paramsBody').innerHTML=params.map(r=>`<tr class="border-b"><td class="py-2">${r[0]}</td><td class="py-2 font-medium">${r[1]}</td><td class="py-2 text-gray-500">${r[2]}</td></tr>`).join('');
 }
 
