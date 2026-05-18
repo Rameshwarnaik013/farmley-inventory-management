@@ -93,12 +93,20 @@
 </div>
 
 <!-- Metrics -->
-<div id="metricsPanel" class="hidden grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Total SKUs</p><p id="metricSKUs" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Safety Stock Value</p><p id="metricSS" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">MIN Inventory</p><p id="metricMin" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">MAX Inventory</p><p id="metricMax" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
-    <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Avg Inventory</p><p id="metricAvg" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+<div id="metricsPanel" class="hidden mb-6">
+    <div class="flex items-center justify-end mb-3">
+        <div class="inline-flex items-center bg-white border rounded-lg p-0.5 shadow-sm">
+            <button id="toggleUnits" onclick="setMetricUnit('units')" class="px-3 py-1 text-xs font-semibold rounded-md bg-[#1F4E79] text-white transition-all">Units</button>
+            <button id="toggleKgs" onclick="setMetricUnit('kgs')" class="px-3 py-1 text-xs font-semibold rounded-md text-gray-500 hover:text-gray-700 transition-all">KGS</button>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Total SKUs</p><p id="metricSKUs" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+        <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Safety Stock <span id="metricSSUnit" class="text-[10px]">(Units)</span></p><p id="metricSS" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+        <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">MIN Inventory <span id="metricMinUnit" class="text-[10px]">(Units)</span></p><p id="metricMin" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+        <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">MAX Inventory <span id="metricMaxUnit" class="text-[10px]">(Units)</span></p><p id="metricMax" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+        <div class="metric-card bg-white rounded-xl shadow-sm border p-4"><p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Avg Inventory <span id="metricAvgUnit" class="text-[10px]">(Units)</span></p><p id="metricAvg" class="text-2xl font-bold text-[#1F4E79] mt-1">-</p></div>
+    </div>
 </div>
 
 <!-- Filters -->
@@ -335,13 +343,33 @@ function applyFilters(){
     document.getElementById('rowCount').textContent=f.length;
 }
 
+let metricUnit='units';
+let lastMetricData=[];
+function setMetricUnit(u){
+    metricUnit=u;
+    document.getElementById('toggleUnits').className='px-3 py-1 text-xs font-semibold rounded-md transition-all '+(u==='units'?'bg-[#1F4E79] text-white':'text-gray-500 hover:text-gray-700');
+    document.getElementById('toggleKgs').className='px-3 py-1 text-xs font-semibold rounded-md transition-all '+(u==='kgs'?'bg-[#1F4E79] text-white':'text-gray-500 hover:text-gray-700');
+    renderMetrics(lastMetricData);
+}
+function fmtQty(v){if(v>=1e7)return (v/1e7).toFixed(2)+' Cr';if(v>=1e5)return (v/1e5).toFixed(2)+' L';if(v>=1e3)return (v/1e3).toFixed(1)+' K';return Math.round(v).toLocaleString('en-IN');}
 function renderMetrics(f){
-    let ss=0,mn=0,mx=0,av=0;f.forEach(r=>{ss+=(r.Safety_Stock_Value||0);mn+=(r.Min_Value||0);mx+=(r.Max_Value||0);av+=(r.Avg_Value||0)});
+    lastMetricData=f;
+    const isKgs=metricUnit==='kgs';
+    const label=isKgs?'KGS':'Units';
+    let ss=0,mn=0,mx=0,av=0;
+    f.forEach(r=>{
+        if(isKgs){ss+=(r.Safety_Stock_KGS||0);mn+=(r.Min_Inventory_KGS||0);mx+=(r.Max_Inventory_KGS||0);av+=(r.Avg_Inventory_KGS||0)}
+        else{ss+=(r.Safety_Stock||0);mn+=(r.Min_Inventory_ROP||0);mx+=(r.Max_Inventory||0);av+=(r.Avg_Inventory||0)}
+    });
     document.getElementById('metricSKUs').textContent=f.length;
-    document.getElementById('metricSS').textContent=`₹${(ss/1e7).toFixed(1)} Cr`;
-    document.getElementById('metricMin').textContent=`₹${(mn/1e7).toFixed(1)} Cr`;
-    document.getElementById('metricMax').textContent=`₹${(mx/1e7).toFixed(1)} Cr`;
-    document.getElementById('metricAvg').textContent=`₹${(av/1e7).toFixed(1)} Cr`;
+    document.getElementById('metricSS').textContent=fmtQty(ss);
+    document.getElementById('metricMin').textContent=fmtQty(mn);
+    document.getElementById('metricMax').textContent=fmtQty(mx);
+    document.getElementById('metricAvg').textContent=fmtQty(av);
+    document.getElementById('metricSSUnit').textContent=`(${label})`;
+    document.getElementById('metricMinUnit').textContent=`(${label})`;
+    document.getElementById('metricMaxUnit').textContent=`(${label})`;
+    document.getElementById('metricAvgUnit').textContent=`(${label})`;
 }
 
 function renderInvTable(f){
